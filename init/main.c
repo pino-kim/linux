@@ -966,6 +966,9 @@ extern initcall_entry_t __initcall6_start[];
 extern initcall_entry_t __initcall7_start[];
 extern initcall_entry_t __initcall_end[];
 
+extern initcall_t __deferred_initcall_start[];
+extern initcall_t __deferred_initcall_end[];
+
 static initcall_entry_t *initcall_levels[] __initdata = {
 	__initcall0_start,
 	__initcall1_start,
@@ -1110,7 +1113,6 @@ static int __ref kernel_init(void *unused)
 	/* need to finish all async __init code before freeing the memory */
 	async_synchronize_full();
 	ftrace_free_init_mem();
-	free_initmem();
 	mark_readonly();
 
 	/*
@@ -1220,4 +1222,29 @@ static noinline void __init kernel_init_freeable(void)
 	 */
 
 	integrity_load_keys();
+}
+
+/* call deferred init routines */
+void do_deferred_initcalls(void)
+{
+	initcall_t *call;
+	static int already_run=0;
+
+	if (already_run) {
+		printk("do_deferred_initcalls() has already run\n");
+		return;
+	}
+
+	already_run=1;
+
+	printk("Running do_deferred_initcalls()\n");
+
+
+	for(call = __deferred_initcall_start;
+	    call < __deferred_initcall_end; call++)
+		do_one_initcall(*call);
+
+	flush_scheduled_work();
+
+	free_initmem();
 }

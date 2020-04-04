@@ -83,7 +83,7 @@ extern void cleanup_module(void);
  * be one per module.
  */
 #define module_init(x)	__initcall(x);
-
+#define deferred_module_init(x)	deferred_initcall(x);
 /**
  * module_exit() - driver exit entry point
  * @x: function to be run when driver is removed

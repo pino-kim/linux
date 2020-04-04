@@ -197,6 +197,11 @@ extern bool initcall_debug;
 		__attribute__((__section__(#__sec ".init"))) = fn;
 #endif
 
+#define deferred_initcall(fn) \
+	static initcall_t __initcall_##fn \
+	__used __section(.deferred_initcall.init) = fn
+
+
 #define __define_initcall(fn, id) ___define_initcall(fn, id, .initcall##id)
 
 /*
